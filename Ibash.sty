@@ -15,14 +15,14 @@
 %along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{IMTbash}[2020/07/30 Isabella's bash typesetting class.]
+\ProvidesPackage{Ibash}[2020/07/30 Isabella's bash typesetting class.]
 
 \RequirePackage{etoolbox}
 
 \newtoggle{eng}
 \DeclareOption{english}{\global\settoggle{eng}{true}}
 
-\DeclareOption*{\PackageWarning{IMTbash}{Unknown ‘\CurrentOption’}}
+\DeclareOption*{\PackageWarning{Ibash}{Unknown ‘\CurrentOption’}}
 \ProcessOptions*\relax
 
 \RequirePackage{listings}
