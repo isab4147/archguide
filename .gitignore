@@ -26,3 +26,4 @@ _region_.tex
 *.fdb_latexmk
 auto/
 *.fls
+*.ptc
