@@ -1,44 +1,628 @@
 \documentclass[dark, index]{Iart}
 
 \usepackage{Ibash, kantlipsum}
+\newcommand{\arch}{\color{theme}\fontspec{NotoSerif Nerd Font Mono} }
 
-\title{Guia \textit{definitivo} de instalação do \textbf{\color{theme}Arch Linux}}
+\title{Guia \textit{definitivo} de instalação do \textbf{\color{theme}Arch Linux} \arch}
 \subtitle{Uma compilação de fontes e recomendações para o dia-a-dia do \textit{sys admin}.}
 % TODO (maybe?): https://stackoverflow.com/questions/27555572/customizing-the-table-of-contents-with-two-colors-in-latex
 \author{Isabella B. \email{isabellabdoamaral@usp.br} \& Juan M. \email{seu@email.com} \& walysu \email{seu@tbm.br}}
+
+
 
 \begin{document}
 	
 	\maketitle
 	
 	\chapter*{Prefácio}
+
+  Esse guia tem por objetivo ajudar aqueles que estão começando no Linux, especialmente no Arch Linux. A proposta é simples: reunir o conhecimento de usuários interessados e que querem contribuir para a comunidade e, por isso, esse guia é feito numa classe própria e simples, e está disponibilizado (com código fonte completo) no \href{github.com/isab4147/archguide}{github}.
+
+  \section*{Por que Arch?}
+
+  Caso você tenha caído aqui de paraquedas ou simplesmente ainda não esteja convencido de que deveria usar o Arch (muito difícil de instalar, instável, etc.), já adianto: \textbf{não vou ser eu a te convencer!}
+  
+  E também tenho um recado aos iniciantes motivados: sem a devida atenção o sistema pode quebrar muito rápido, e a instalação talvez não seja trivial (pro seu sistema, pelo menos\ldots).
+
+  Mas, fora isso, existem inúmeras vantagens numa instalação Arch para um usuário intermediário-avançado, por exemplo:
+  \begin{itemize}
+    \item \textbf{Muita customização desde o primeiro contato}
+      
+      A instalação base é mínima (\hyperref[subs:kernelIntro]{nos limites do kernel}). 
+    \item \textbf{O controle do usuário é amplo}
+
+      Isso não necessariamente tem a ver com customização, mas o chamado \textit{Arch Way} é deixar o usuário nos limites de sua liberdade, adotando a filosofia do \textbf{RTFM}\footnote{Caso você não saiba, isso quer dizer \textit{Read The Fucking Manual}.}.
+    \item \textbf{Muito educativo}
+      
+      Segue diretamente do último ponto abordado, e é a principal motivação desse guia: o Arch não é um Linux para usuários preguiçosos. Ele requer \textbf{tempo} e \textbf{interesse} ou, como diria uma amiga: é um pinguim carente. 
+  \end{itemize}
+
+  Se você é iniciante e acha que esse é o sistema para você: seja muito bem vindo e vamos \hyperref[part:install]{instalar o Arch!} Caso contrário, existe uma parte nesse guia dedicada à \hyperref[part:linuxSys]{discussão do sistema Linux} e \hyperref[chap:distros]{comparação com outras distros.}
+
+  \vfill
+
+  \begin{flushright}
+    \itshape Isabella B.,\\
+    27 de outubro, 2020
+  \end{flushright}
 	
-	\TODO{objetivos gerais etc...}
+	%\TODO{objetivos gerais etc...}
 	
 	\part{Instalação}
+  \label{part:install}
 	
 	\chapter{Preparando o meio de instalação}
+    Enfim, essa é a parte fácil, vamos nos preparar para a instalação. Existem alguns passos que, embora não sejam necessários seguem como recomendações para uma instalação mais \textit{suave}:
+
+  \begin{itemize}
+    \item Confira se o disco em que vai instalar possui tabela de partição GPT.
+    \item 
+  \end{itemize}
 	
 	\section{Baixe a iso}
-		
-	\begin{citemize}
-		\item meow
-	\end{citemize}
 	
-	\ort %ou 
-	\term{meow} %termo a ser indexado
-	\nott %não
-	\avdt % evite
-%	ok.
-		
-	\kant[1-10]
-		
 	\section{Prepare o pen drive}
 		
 	\chapter{Bootando o PC}
 	
-	\part{lorem ipsum}
+  \chapter{Speedrun pros brabos}
+  % TODO: conferir o prompt
+  
+  %firstnumber=auto, name=same
+  %firstnumber=last
+  %frame=trBL
+  %frameround=fttt
+\begin{lstlisting}
+loadkeys br-abnt2
+ls /sys/firmware/efi/efivars
+
+# Para BIOS Legacy
+fdisk -l
+# se disklabel for GPT continue, se não
+dd if=/dev/zero of=/dev/'disco' bs=4096 status=progress
+gdisk /dev/'disco'
+$ n
+$ 
+$ +1M
+$ ef02
+$ w
+
+# sem cabo
+# 1. celular
+ip link show
+ip link set 'seu-aparelho' up
+dhcpcd -h 'seu-aparelho'
+# 2. wifi
+rfkill unblock all
+[root@archiso root]# iwctl
+[iwd]# station wlan0 connect 'rede'
+password: 
+[iwd]# quit
+
+# teste de rede
+ping -c 2 google.com
+timedatectl set-ntp true
+
+# particionamento
+fdisk -l
+fdisk /dev/'disco'
+# d para deletar
+# n para nova partição
+# t para mudar o tipo
+# p para listar as partições
+# w para escrever as alterações
+# q para cancelar
+
+# dica:
+# para instação Vanilla faça uma partição
+# pro / e outra para home 
+# para btrfs (avançado) faça uma partição
+# única para ambos
+# em ambos os casos faça uma partição para
+#boot (tipo BIOS boot ─ código 4)
+# e talvez swap também (tipo Linux Swap ─ código 19)
+
+# formatação (para single boot)
+mkfs.fat -F32 /dev/'pboot'
+# para dual boot
+mkfs.ext4 /dev/'pboot'
+# caso tenha feito o swap
+mkswap /dev/'pswap'
+swapon /dev/'pswap'
+
+# para btrfs
+mkfs.btrfs -L 'label' /dev/'punique'
+
+# para Vanilla
+mkfs.ext4 /dev/'pslash'
+mkfs.ext4 /dev/'phome'
+
+# montagem Vanilla
+mount /dev/'pslash'
+
+# devboot = partição com bios boot
+# devslash = partição do /
+# devhome = partição do home
+# devswap = partição do swap
+mkfs.fat -F32 devboot
+mkfs.ext4 devslash
+mkfs.ext4 devhome
+mkswap devswap
+mount devslash /mnt
+mkdir /mnt/{boot,home}
+mount devhome /mnt/home
+
+# para BIOS boot
+mount devboot /mnt/boot
+
+# para EFI boot
+mkdir /mnt/boot/efi
+mount devboot /mnt/boot/efi
+
+# continuando
+swapon devswap
+# confira se montou tudo corretamente
+lsblk
+
+# para hardware mais novo
+pacstrap /mnt base base-devel linux linux-firmware linux-headers
+
+# para hardware mais antigo (ou para uma experiência mais estável)
+pacstrap /mnt base base-devel linux-firmware linux-lts linux-lts-headers linux-lts-docs
+
+genfstab -U -p /mnt >> /mnt/etc/fstab
+
+
+
+# agora vamos entrar no sistema
+arch-chroot /mnt
+timedatectl set-timezone America/Sao_Paulo
+
+ln -sf  /usr/share/zoneinfo/America/Sao_Paulo  /etc/localtime
+
+hwclock --systohc
+pacman -S nano
+nano /etc/locale.gen
+
+/etc/locale.gen
+---------------
+(descomente a linha do local q vc quer ─ ambos UTF8 e ISO)
+
+# salve e saia
+locale-gen
+# lang -> lingua do local que você escolheu
+
+echo LANG=lang.UTF-8 >> /etc/locale.conf
+echo KEYMAP=br-abnt2 >> /etc/vconsole.conf
+echo 'nome do pc' >> /etc/hostname
+nano /etc/hosts
+
+/etc/hosts
+-------------
+127.0.0.1 \t localhost \n
+::1 \t localhost \n
+127.0.1.1 \t 'nome do pc'.localdomain \t 'nome do pc'
+
+# salve e saia
+passwd
+# digite a senha do root
+
+pacman -S dosfstools mtools dialog sudo ntfs-3g
+# se você conectou pelo wifi (ou celular) possui hardware mais novo
+pacman -S networkmanager wireless_tools dhcpcd iwd
+# -- hardware mais antigo
+pacman -S networkmanager wireless_tools dhcpcd iwd wpa_supplicant netctl
+
+# para processador intel
+pacman -S intel-ucode
+# para processador amd
+pacman -S amd-ucode
+
+# caso esteja instalando pela primeira vez
+useradd -m -g users -G wheel 'nome do usuário'
+
+# caso esteja reinstalando
+useradd -g users -G wheel nome_do_usuario
+
+usermod -d /home/nome_do_usuario -m nome_do_usuario
+
+# após isso
+passwd 'nome do usuário'
+nano /etc/sudoers
+
+/etc/sudoers
+---------------
+# Insult me
+Defaults \t insults
+
+%wheel ALL=(ALL) ALL
+
+# salve e saia
+
+#Para BIOS boot
+pacman -S grub
+grub-install --target=i386-pc --recheck /dev/sda
+
+# OU
+#Para EFI boot
+pacman -S grub efibootmgr
+
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=arch_grub --recheck
+
+# após isso
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# para dual boot
+pacman -S os-prober
+os-prober
+
+# enfim
+^D
+
+shutdown now
+
+
+# logue como seu user
+sudo pacman -Sy xorg-server
+
+# para placa de vídeo AMD
+sudo pacman -S xf86-video-amdgpu
+# ou pesquise para nvidia
+
+# VANILLA
+sudo pacman -S libgl mesa sddm plasma konsole dolphin alsa pulseaudio-alsa network-manager-applet
+
+systemctl enable sddm
+
+reboot
+
+# logue no sistema
+sudo pacman -S git 
+
+git clone https://aur.archlinux.org/yay
+cd yay
+makepkg -si
+
+sudo nano /etc/pacman.conf
+
+/etc/pacman.conf
+#descomente as duas linhas abaixo
+
+// IMAGEM
+
+# salve e saia
+
+sudo pacman -Syyu
+
+yay -S networkmanager-iwd
+
+sudo systemctl enable NetworkManager
+sudo systemctl enable iwd
+
+
+Algumas packages recomendadas:
+brave -> navegador; neofetch; cmatrix -> são legais
+wps -> equivalente ao office, alternativamente use o libreoffice-fresh + libreoffice-fresh-pt-br
+okular -> para pdfs
+gthump -> para imagens
+galculator -> calculadora legalzinha, alternativamente: kcalc
+whatsapp, zoom, discord, stremio -> clientes das aplicações
+gparted -> gerenciamento de disco
+smplayer, vlc -> players
+p7zip -> 7z
+spectacle -> screenshots, alternativamente use maim + xclip + sxiv ou escrotum
+kdeconnect -> conexão com celular (requer app)
+emacs -> editor, alternativamente use o neovim
+playonlinux -> para aplicações windows
+man-db, man-pages, man-pages-pt_br -> páginas de manual para o arch
+kdegraphics-thumbnailers -> para ver thumbs no dolphin
+
+yay -S brave neofetch cmatrix wps-office wps-office-extension-portuguese-dictionary okular gthumb qbittorrent spectacle galculator whatsapp-nativefier smplayer discord gparted p7zip zoom vlc kdeconnect emacs man-db man-pages man-pages-pt_br kdegraphics-thumbnailers stremio
+
+para spotify:
+curl -sS https://download.spotify.com/debian/pubkey.gpg | gpg --import -
+yay -S spotify
+
+para latex:
+yay -S texlive-bin texlive-core texlive-most texlive-lang tllocalmgr-git
+
+http://www.hannahdee.eu/blog/?p=835
+https://tex.stackexchange.com/questions/445521/latexindent-cant-locate-log-log4perl-pm-in-inc-you-may-need-to-install-the-l
+
+
+para texstudio:
+yay -S texstudio
+sudo chmod 777 ~/.config/texstudio/texstudio.ini
+
+fontes recomendadas:
+yay -S adobe-source-han-sans-jp-fonts powerline-fonts ttf-baekmuk ttf-arphic-uming noto-fonts-emoji nerd-fonts-complete
+
+fontes nice:
+yay -S ttf-iosevka ttf-iosevka ttf-roboto ttf-raleway ttf-fira-mono
+
+https://linuxwacom.github.io/
+
+
+para o dolphin: 
+
+balooctl disable
+rm -rf ~/.local/share/baloo
+
+https://github.com/vitalif/grive2/issues/287
+
+mamutal91
+
+
+https://linuxcommando.blogspot.com/2013/10/how-to-connect-to-wpawpa2-wifi-network.html?m=1
+
+https://techbeat.in/2020/01/15/setup-arch-linux-on-dell-xps-13-7390.html
+
+https://wiki.archlinux.org/index.php/installation_guide
+
+https://diolinux.com.br/2019/07/como-instalar-arch-linux-tutorial-iniciantes.html
+
+https://itsfoss.com/install-arch-linux/
+
+
+VAR=$(cat ~/gdrive/texpackages.out)
+yay -S ${VAR}
+
+pac -Qqt
+
+yay -Rcns (yay -Qqdt)
+
+A find alternative: https://github.com/sharkdp/fd, alternativa pro find
+
+https://github.com/ogham/exa, alternativa pro ls
+
+https://github.com/sharkdp/bat, alternativa pro cat
+
+https://github.com/BurntSushi/ripgrep, alternativa pro grep
+https://fishshell.com/, alternativa pro Bash
+https://github.com/phiresky/ripgrep-all
+
+Mesma coisa q o ripgrep, só q pesquisa dentro de pdfs tbm
+
+https://www.archlinux.org/news/arch-conf-2020-schedule/
+
+https://github.com/elenapan/dotfiles
+
+caso seu pen drive se torne inutilizável no Windows, faça:
+
+win+r
+diskpart
+list disk
+select disk num
+clean
+select disk num
+create partition primary
+select partition 1
+active
+format fs=fat32 quick
+
+caso ainda não apareça, altere o caminho na ferramenta de gerenciamento de disco
+
+
+https://wiki.archlinux.org/index.php/NVIDIA
+
+https://wiki.archlinux.org/index.php/PRIME
+
+https://rufus.ie/
+
+https://www.archlinux.org/download/
+
+https://www.majorgeeks.com/mg/getmirror/bootable_usb_test,1.html
+
+https://wiki.archlinux.org/index.php/System_time#UTC_in_Windows
+
+https://www.msi.com/Motherboard/support/H81M-E33#down-driver&Win10%2064
+
+https://gist.github.com/ppartarr/175aa0c3416daf3baacde17f442f80e1
+
+https://github.com/egara/arch-btrfs-installation
+
+caso haja problemas nas chaves de uma package, importe desse servidor:
+
+keyserver.ubuntu.com
+
+e.g.:
+tentamos instalar o powerpill
+$ pacman -S powerpill
+e no final temos o erro das chaves
+...
+[GPG]
+key, could not be imported
+
+portanto rodamos
+gpg --keyserver keyserver.ubuntu.com --recv-keys key
+
+isso é pra verificar suas opções de mount antes de fazer merda
+
+sudo findmnt --verify --verbose
+
+
+OPÇÕES DE MOUNT (para fstab)
+troque relatime -> noatime nas partições de uso comum e no tmp
+discard para ativar TRIM
+autodefrag para fazer automaticamente no boot
+compress=lzo como opção eficiente de defrag
+https://btrfs.wiki.kernel.org/index.php/Manpage/btrfs(5)
+https://mutschler.eu/linux/btrfs/
+https://www.reddit.com/r/archlinux/comments/5zi34u/recommended_file_system_for_a_nvme_ssd_and_your/
+https://www.reddit.com/r/openSUSE/comments/6u9gmo/performance_issues_related_with_btrfs/
+
+noatime,ssd,discard,autodefrag,compress=lzo
+
+dps no terminal:
+btrfs quota disable partição
+
+https://btrfs.wiki.kernel.org/index.php/SysadminGuide
+
+
+Resolver problema do discord:
+
+Baixa o discord pelo site
+extrai o .tar.gz (de preferência com bsdtar -xf)
+entre na pasta que tu extraiu
+chmod +x postinst.sh
+./postinst.sh
+renomeia essa pasta para discord (de preferência usando o comando mv)
+cd /lugar/do/arquivo
+mv /nome/do/arquivo discord
+sudo cp -r /lugar/do/arquivo/discord /opt
+da um yay -S discord pra atualizar o lançador
+
+
+SETUP DE UMA INSTALAÇÃO MAIS SEGURA:
+# tente instalar o powerpill
+# ele vai dar erro de chave, copie e cole a chave como abaixo:
+
+gpg --keyserver keyserver.ubuntu.com --recv-keys EC3CBE7F607D11E663149E811D1F0DC78F173680
+
+yay -S powerpill pacmatic
+
+sudo nano /etc/powerpill/powerpill.json
+
+/etc/powerpill/powerpill.json
+------------
+"aria2":{
+	...
+	# adicione a linha do print 
+	# salva e sai
 	
-	\chapter{blablabla}
+	yay -S fish z
+	chsh -s /bin/fish
 	
+	# reloga
+	curl -L https://get.oh-my.fish/ | fish
+	omf install bobthefish
+	git clone https://github.com/jbonjean/re-search.git
+	omf install re-search
+	cd re-search
+	make
+	mkdir ~/bin
+	cp re-search ~/bin
+	cp re_search.fish ~/.config/fish/functions
+	echo bind \cr re_search >> ~/.config/fish/functions/fish_user_key_bindings.fish
+	fish_config
+	
+	nano ~/.config/fish/config.fish 
+	
+	~/.config/fish/config.fish
+	-----------
+	
+	alias pac=yay
+	
+	# pacmatic needs to be run as root: https://github.com/keenerd/pacmatic/issues/35
+	alias pacmatic='sudo --preserve-env=pacman_program /usr/bin/pacmatic'
+	
+	## ATENÇÃO EM seu-user ABAIXO
+	# Downgrade permissions as AUR helpers expect to be run as a non-root user. $UID is read-only in {ba,z}sh.
+	function yay --wraps pacman_program --description 'alias yay=pacman_program'
+	pacman_program="sudo -u seu-user$UID /usr/bin/yay --pacman powerpill" pacmatic $argv
+	end
+	
+	set -gx PATH $PATH $HOME/bin
+	
+	set -g theme_date_timezone America/Sao_Paulo
+	
+	## salva e sai
+	
+	# agora é só reabrir o terminal
+	
+	pac -S rustup
+	rustup install stable
+	rustup default stable
+	pac -S topgrade
+	
+	https://aur.archlinux.org/packages/?O=0&K=topgrade e https://github.com/r-darwish/topgrade
+	
+	o comando "topgrade -c" vai rodar todos os comandos responsaveis por atualização de pacotes/softwares, como, yay -Syu --devel e git pull --rebase, além de limpar o cache
+
+
+https://wiki.archlinux.org/index.php/Reflector
+https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration
+https://wiki.archlinux.org/index.php/Touchpad_Synaptics
+
+
+https://wiki.archlinux.org/index.php/GnuPG#Create_a_key_pair
+https://wiki.archlinux.org/index.php/Pass
+
+
+
+GnuPG
+https://wiki.archlinux.org/index.php/Pacman/Tips_and_tricks
+
+
+https://wiki.archlinux.org/index.php/Bluetooth_headset
+https://unix.stackexchange.com/questions/255509/bluetooth-pairing-on-dual-boot-of-windows-linux-mint-ubuntu-stop-having-to-p
+
+
+https://github.com/overlock1
+
+
+
+/etc/X11/xorg.conf.d/30-touchpad.conf
+--------------
+Section "InputClass"
+Identifier  "Touchpad"
+Driver  "libinput"
+MatchIsTouchpad "on"
+Option "AccelProfile" "flat"
+Option "AccelSpeed" "1"
+Option "ClickMethod" "clickfinger"
+Option "DisableWhileTyping" "true"
+Option "HorizontalScrolling" "true"
+Option "NaturalScrolling" "true"
+Option "ScrollMethod" "twofinger"
+Option "Tapping" "true"
+Option "TappingDrag" "true"
+Option "TappingDragLock" "true"
+EndSection
+https://wiki.archlinux.org/index.php/Libinput
+
+
+https://jlk.fjfi.cvut.cz/arch/manpages/man/libinput.4
+
+
+https://wiki.archlinux.org/index.php/Pacman/Package_signing#Cannot_import_keys
+
+
+https://disconnected.systems/blog/archlinux-repo-in-aws-bucket/#wrapper-scripts
+
+
+https://www.reddit.com/r/archlinux/comments/7v7g4w/managing_multiple_arch_linux_systems_with/
+
+sudo su
+fdisk -l
+dd bs=4M if=/skjajsj/iso of=/dev/sdb status=progress oflag=sync
+
+https://wiki.archlinux.org/index.php/System_time#UTC_in_Windows
+
+ln -s /usr/share/X11/xorg.conf.d/40-libinput.conf /etc/X11/xorg.conf.d/40-libinput.conf
+
+chsh -s /bin/fish
+
+https://store.kde.org/p/1312658/
+
+https://gist.github.com/ppartarr/175aa0c3416daf3baacde17f442f80e1
+
+
+crie o
+/etc/sysctl.d/99-sysctl.conf
+
+kernel.sysrq=1
+
+\end{lstlisting}
+
+	\part{Entendendo o sistema Linux}
+  \label{part:linuxSys}
+  
+  \chapter{Uma breve exploração das distribuições Linux}
+  \label{chap:distros}
+
+  \section{E o Arch nisso tudo?}
+  
+  \subsection{Customização do Kernel, compilando pacotes e a visão do Gentoo}
+  \label{subs:kernelIntro}
 \end{document}
