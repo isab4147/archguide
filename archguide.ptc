@@ -1,0 +1,17 @@
+\selectlanguage *[variant=brazilian]{portuguese}
+\ttl@starttoc {default@1}
+\ttl@starttoc {parts@1}
+\contentsline {part}{I\hspace {1em}Instalação}{5}{part.1}%
+\contentsline {chapter}{\numberline {1}Preparando o meio de instalação}{9}{chapter.1}%
+\contentsline {section}{\numberline {I}Baixe a iso}{9}{section.1.1}%
+\contentsline {section}{\numberline {II}Prepare o pen drive}{9}{section.1.2}%
+\contentsline {chapter}{\numberline {2}Bootando o PC}{11}{chapter.2}%
+\contentsline {chapter}{\numberline {3}Speedrun pros brabos}{13}{chapter.3}%
+\ttl@stoptoc {parts@1}
+\ttl@starttoc {parts@2}
+\contentsline {part}{II\hspace {1em}Entendendo o sistema Linux}{15}{part.2}%
+\contentsline {chapter}{\numberline {4}Uma breve exploração das distribuições Linux}{19}{chapter.4}%
+\contentsline {section}{\numberline {I}E o Arch nisso tudo?}{19}{section.4.1}%
+\contentsline {subsection}{\numberline {a}Customização do Kernel, compilando pacotes e a visão do Gentoo}{19}{subsection.4.1.1}%
+\contentsline {chapter}{\large \bfseries Índice remissivo}{19}{section*.2}%
+\contentsfinish 
